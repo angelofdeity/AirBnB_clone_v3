@@ -15,7 +15,7 @@ def get_places_by_city_id(city_id):
     if not city:
         abort(404)
     return jsonify([obj.to_dict()
-                    for obj in objects if obj.city_id == city_id])
+                    for obj in objects.values() if obj.city_id == city_id])
 
 
 @app_views.route('/places/<place_id>', strict_slashes=False)
@@ -61,6 +61,8 @@ def create_place(city_id):
                  strict_slashes=False)
 def update_place(place_id):
     """updates a Place object"""
+    print("long", request.get_json())
+    print(request.json)
     obj = storage.get(Place, place_id)
     if not obj:
         abort(404)
