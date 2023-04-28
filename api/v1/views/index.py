@@ -13,13 +13,13 @@ from models.review import Review
 from models.user import User
 
 
-@app_views.route("/status")
+@app_views.route("/status", methods=['GET'], strict_slashes=False)
 def status():
     """status of API"""
     return jsonify({'status': "OK"})
 
 
-@app_views.route("/stats")
+@app_views.route("/stats", methods=['GET'], strict_slashes=False)
 def number_of_objects():
     """retrieves the number of each objects by type"""
     objs = {
