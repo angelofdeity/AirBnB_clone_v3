@@ -32,7 +32,7 @@ def delete_amenity_by_id(amenity_id):
     if not obj:
         abort(404)
     storage.delete(obj)
-    return jsonify({})
+    return jsonify({}), 200
 
 @app_views.route('/amenities', methods=['POST'],
                  strict_slashes=False)
@@ -42,7 +42,7 @@ def create_amenity():
         abort(400, 'Not a JSON')
     if 'name' not in request.json:
         abort(400, 'Missing name')
-    obj = Amenity(name=request.json['name'])
+    obj = Amenity(**request.json)
     storage.new(obj)
     storage.save()
     return jsonify(obj.to_dict()), 201
