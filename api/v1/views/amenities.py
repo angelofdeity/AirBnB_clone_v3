@@ -7,7 +7,6 @@ from api.v1.views import app_views
 from datetime import datetime
 
 objects = storage.all(Amenity)
-clskeyprefix = 'Amenity.'
 
 @app_views.route('/amenities', strict_slashes=False)
 def amenities():
@@ -18,7 +17,7 @@ def amenities():
 @app_views.route('/amenities/<amenity_id>', strict_slashes=False)
 def get_amenity_by_id(amenity_id):
     """retrieves a Amenity object using it's id"""
-    amenity = objects.get(clskeyprefix + amenity_id)
+    amenity = storage.get(Amenity, amenity_id)
     if not amenity:
         abort(404)
     return jsonify(amenity.to_dict())
@@ -28,7 +27,7 @@ def get_amenity_by_id(amenity_id):
                  strict_slashes=False)
 def delete_amenity_by_id(amenity_id):
     """deletes a Amenity object"""
-    obj = objects.get(clskeyprefix + amenity_id)
+    obj = storage.get(Amenity, amenity_id)
     if not obj:
         abort(404)
     storage.delete(obj)
@@ -52,7 +51,7 @@ def create_amenity():
                  strict_slashes=False)
 def update_amenity(amenity_id):
     """updates a Amenity object"""
-    obj = objects.get(clskeyprefix + amenity_id)
+    obj = storage.get(Amenity, amenity_id)
     if not obj:
         abort(404)
     if not request.json:
