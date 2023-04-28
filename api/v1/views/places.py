@@ -37,6 +37,7 @@ def delete_place_by_id(place_id):
     if not obj:
         abort(404)
     storage.delete(obj)
+    storage.save()
     return jsonify({}), 200
 
 
@@ -56,6 +57,7 @@ def create_place(city_id):
     obj = Place(**request.json)
     storage.new(obj)
     storage.save()
+    storage.reload()
     return jsonify(obj.to_dict()), 201
 
 @app_views.route('/places/<place_id>', methods=['PUT'],

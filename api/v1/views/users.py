@@ -32,6 +32,7 @@ def delete_user_by_id(user_id):
     if not obj:
         abort(404)
     storage.delete(obj)
+    storage.save()
     return jsonify({}), 200
 
 @app_views.route('/users', methods=['POST'],

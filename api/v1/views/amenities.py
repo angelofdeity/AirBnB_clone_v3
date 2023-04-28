@@ -32,6 +32,7 @@ def delete_amenity_by_id(amenity_id):
     if not obj:
         abort(404)
     storage.delete(obj)
+    storage.save()
     return jsonify({}), 200
 
 @app_views.route('/amenities', methods=['POST'],
