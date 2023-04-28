@@ -8,6 +8,7 @@ from datetime import datetime
 
 objects = storage.all(User)
 
+
 @app_views.route('/users', strict_slashes=False)
 def users():
     """retrieves the list of all User objects"""
@@ -34,6 +35,7 @@ def delete_user_by_id(user_id):
     storage.save()
     return jsonify({}), 200
 
+
 @app_views.route('/users', methods=['POST'],
                  strict_slashes=False)
 def create_user():
@@ -45,9 +47,12 @@ def create_user():
     if 'password' not in request.json:
         abort(400, 'Missing password')
     obj = User(**request.json)
+    key = 'User.' + obj.to_dict().get('id')
+    objects.update({key: obj})
     storage.new(obj)
     storage.save()
     return jsonify(obj.to_dict()), 201
+
 
 @app_views.route('/users/<user_id>', methods=['PUT'],
                  strict_slashes=False)
@@ -60,7 +65,7 @@ def update_user(user_id):
         abort(400, 'Not a JSON')
     for key, value in request.json.items():
         if (key in obj.__dict__ and key not in
-        ['id', 'email', 'created_at', 'updated_at']):
+                ['id', 'email', 'created_at', 'updated_at']):
             setattr(obj, key, value)
     setattr(obj, 'updated_at', datetime.utcnow())
     storage.save()

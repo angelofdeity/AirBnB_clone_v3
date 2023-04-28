@@ -9,6 +9,7 @@ from models.city import City
 
 objects = storage.all(Place)
 
+
 @app_views.route('/cities/<city_id>/places', strict_slashes=False)
 def get_places_by_city_id(city_id):
     city = storage.get(City, city_id)
@@ -53,9 +54,12 @@ def create_place(city_id):
     if 'name' not in request.json:
         abort(400, 'Missing name')
     obj = Place(**request.json)
+    key = 'Place.' + obj.to_dict().get('id')
+    objects.update({key: obj})
     storage.new(obj)
     storage.save()
     return jsonify(obj.to_dict()), 201
+
 
 @app_views.route('/places/<place_id>', methods=['PUT'],
                  strict_slashes=False)
@@ -70,7 +74,7 @@ def update_place(place_id):
         abort(400, 'Not a JSON')
     for key, value in request.json.items():
         if (key in obj.__dict__ and key not in
-        ['id', 'user_id', 'city_id','created_at', 'updated_at']):
+                ['id', 'user_id', 'city_id', 'created_at', 'updated_at']):
             setattr(obj, key, value)
     setattr(obj, 'updated_at', datetime.utcnow())
     storage.save()
