@@ -8,8 +8,6 @@ from models import storage
 from models.place import Place
 from models.review import Review
 
-objects = storage.all(Place)
-
 
 @app_views.route('/places/<place_id>/reviews', strict_slashes=False)
 def reviews_by_place(place_id):
@@ -37,7 +35,7 @@ def delete_review_by_id(review_id):
     review = storage.get(Review, review_id)
     if not review:
         abort(404)
-    storage.delete(review)
+    review.delete()
     storage.save()
     return jsonify({})
 
@@ -48,9 +46,9 @@ def create_review(place_id):
     """creates a new Review object"""
     data = request.get_json(silent=True)
     if not data:
-        abort(404, "Not a JSON")
+        abort(400, "Not a JSON")
     if not data.get('name'):
-        abort(404, "Missing name")
+        abort(400, "Missing name")
     obj = storage.get(Place, place_id)
     if not obj:
         abort(404)
@@ -73,5 +71,5 @@ def update_review(review_id):
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
             setattr(obj, key, value)
-    storage.save()
+    obj.save()
     return jsonify(obj.to_dict())
