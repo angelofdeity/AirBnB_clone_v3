@@ -6,6 +6,7 @@ from models import storage
 from api.v1.views import app_views
 from datetime import datetime
 from models.city import City
+from models.user import User
 
 
 @app_views.route('/cities/<city_id>/places', strict_slashes=False)
@@ -45,7 +46,10 @@ def create_place(city_id):
     """creates a Place object"""
     city = storage.get(City, city_id)
     data = request.get_json(silent=True)
+    user = storage.get(User, data['user_id'])
     if not city:
+        abort(404)
+    if not user:
         abort(404)
     if not data:
         abort(400, 'Not a JSON')
