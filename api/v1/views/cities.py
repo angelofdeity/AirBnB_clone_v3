@@ -39,6 +39,8 @@ def delete_city_by_id(city_id):
     if not city:
         abort(404)
     storage.delete(city)
+    key = "City." + city_id
+    del objects[key]
     storage.save()
     return jsonify({})
 
@@ -74,5 +76,6 @@ def update_city(city_id):
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
             setattr(obj, key, value)
+    obj.save()
     storage.save()
     return jsonify(obj.to_dict())
