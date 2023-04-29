@@ -7,6 +7,7 @@ from api.v1.views import app_views
 from models import storage
 from models.place import Place
 from models.review import Review
+from models.user import User
 
 
 @app_views.route('/places/<place_id>/reviews', strict_slashes=False)
@@ -45,13 +46,19 @@ def delete_review_by_id(review_id):
 def create_review(place_id):
     """creates a new Review object"""
     data = request.get_json(silent=True)
-    if not data:
-        abort(400, "Not a JSON")
-    if not data.get('name'):
-        abort(400, "Missing name")
     obj = storage.get(Place, place_id)
     if not obj:
         abort(404)
+    if not data:
+        abort(400, "Not a JSON")
+    user_id = data.get('user_id')
+    if not user_id:
+        abort(400, "Missing user_id")
+    user = storage.get(User, user_id)
+    if not user:
+        abort(404)
+    if not data.get('text'):
+        abort(400, "Missing text")
     data.update({'place_id': place_id})
     review = Review(**data)
     review.save()
@@ -68,8 +75,9 @@ def update_review(review_id):
     data = request.get_json(silent=True)
     if not data:
         abort(400, 'Not a JSON')
+    ignore = ['id', 'created_at', 'updated_at', 'user_id', 'place_id']
     for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at']:
+        if key not in ignore:
             setattr(obj, key, value)
     obj.save()
     return jsonify(obj.to_dict())
