@@ -38,6 +38,8 @@ def delete_review_by_id(review_id):
     if not review:
         abort(404)
     storage.delete(review)
+    key = "Review." + review_id
+    del objects[key]
     storage.save()
     return jsonify({})
 
@@ -73,5 +75,6 @@ def update_review(review_id):
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
             setattr(obj, key, value)
+    obj.save()
     storage.save()
     return jsonify(obj.to_dict())
