@@ -35,7 +35,7 @@ def delete_place_by_id(place_id):
     obj = storage.get(Place, place_id)
     if not obj:
         abort(404)
-    storage.delete(obj)
+    obj.delete()
     storage.save()
     return jsonify({}), 200
 
@@ -55,10 +55,7 @@ def create_place(city_id):
     if 'name' not in data:
         abort(400, 'Missing name')
     obj = Place(**data)
-    key = 'Place.' + obj.id
-    objects.update({key: obj})
-    storage.new(obj)
-    storage.save()
+    obj.save()
     return jsonify(obj.to_dict()), 201
 
 
@@ -76,6 +73,5 @@ def update_place(place_id):
         if (key in obj.__dict__ and key not in
                 ['id', 'user_id', 'city_id', 'created_at', 'updated_at']):
             setattr(obj, key, value)
-    setattr(obj, 'updated_at', datetime.utcnow())
-    storage.save()
+    obj.save()
     return jsonify(obj.to_dict()), 200

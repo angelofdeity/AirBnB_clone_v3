@@ -4,13 +4,11 @@ from flask import abort, jsonify, request
 from models.user import User
 from models import storage
 from api.v1.views import app_views
-from datetime import datetime
-
-objects = storage.all(User)
 
 
 @app_views.route('/users', strict_slashes=False)
 def users():
+    objects = storage.all(User)
     """retrieves the list of all User objects"""
     return jsonify([obj.to_dict() for obj in objects.values()])
 
@@ -31,7 +29,7 @@ def delete_user_by_id(user_id):
     obj = storage.get(User, user_id)
     if not obj:
         abort(404)
-    storage.delete(obj)
+    obj.delete()
     storage.save()
     return jsonify({}), 200
 
@@ -48,10 +46,7 @@ def create_user():
     if 'password' not in data:
         abort(400, 'Missing password')
     obj = User(**data)
-    key = 'User.' + obj.id
-    objects.update({key: obj})
-    storage.new(obj)
-    storage.save()
+    obj.save()
     return jsonify(obj.to_dict()), 201
 
 
@@ -69,6 +64,5 @@ def update_user(user_id):
         if (key in obj.__dict__ and key not in
                 ['id', 'email', 'created_at', 'updated_at']):
             setattr(obj, key, value)
-    setattr(obj, 'updated_at', datetime.utcnow())
-    storage.save()
+    obj.save()
     return jsonify(obj.to_dict()), 200
