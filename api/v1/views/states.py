@@ -13,25 +13,57 @@ objects = storage.all(State)
 @app_views.route('/states', strict_slashes=False)
 def states():
     """retrieves the list of all State objects"""
-    obj_list = [obj.to_dict() for obj in objects.values()]
-    return jsonify(obj_list)
+    return jsonify([obj.to_dict() for obj in objects.values()])
 
 
 @app_views.route("/states/<state_id>", methods=['GET'], strict_slashes=False)
 def get_state_by_id(state_id):
-    """retrieves a State object using it's id"""
-    obj = objects.get('State.' + state_id)
-    if not obj:
+    """retrieves a State object using its id"""
+    state = storage.get(State, state_id)
+    if not state:
         abort(404)
-    return jsonify(obj.to_dict())
+    return jsonify(state.to_dict())
 
 
 @app_views.route("/states/<state_id>", methods=['DELETE'],
                  strict_slashes=False)
 def delete_state_by_id(state_id):
     """deletes a State object"""
-    obj = objects.get('State.' + state_id)
+    state = storage.get(State, state_id)
+    if not state:
+        abort(404)
+    storage.delete(state)
+    storage.save()
+    return jsonify({})
+
+
+@app_views.route("/states", methods=['POST'], strict_slashes=False)
+def create_state():
+    """create a new State object"""
+    data = request.get_json(silent=True)
+    if not data:
+        abort(404, "Not a JSON")
+    if not data.get('name'):
+        abort(404, "Missing name")
+    obj = State(**data)
+    obj.save()
+    key = "State." + obj.id
+    objects.update({key: obj})
+    return jsonify(obj.to_dict()), 201
+
+
+@app_views.route("/states/<state_id>", methods=['PUT'],
+                 strict_slashes=False)
+def update_state(state_id):
+    """updates a State object"""
+    obj = storage.get(State, state_id)
     if not obj:
         abort(404)
-    storage.delete(obj)
-    return jsonify({})
+    data = request.get_json(silent=True)
+    if not data:
+        abort(400, 'Not a JSON')
+    for key, value in data.items():
+        if key not in ['id', 'created_at', 'updated_at']:
+            setattr(obj, key, value)
+    storage.save()
+    return jsonify(obj.to_dict())
