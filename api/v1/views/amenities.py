@@ -6,12 +6,11 @@ from models import storage
 from api.v1.views import app_views
 from datetime import datetime
 
-objects = storage.all(Amenity)
-
 
 @app_views.route('/amenities', strict_slashes=False)
 def amenities():
     """retrieves the list of all Amenity objects"""
+    objects = storage.all(Amenity)
     return jsonify([obj.to_dict() for obj in objects.values()])
 
 
@@ -31,7 +30,7 @@ def delete_amenity_by_id(amenity_id):
     obj = storage.get(Amenity, amenity_id)
     if not obj:
         abort(404)
-    storage.delete(obj)
+    obj.delete()
     storage.save()
     return jsonify({}), 200
 
@@ -46,10 +45,7 @@ def create_amenity():
     if 'name' not in data:
         abort(400, 'Missing name')
     obj = Amenity(**data)
-    key = 'Amenity.' + obj.id
-    objects.update({key: obj})
-    storage.new(obj)
-    storage.save()
+    obj.save()
     return jsonify(obj.to_dict()), 201
 
 
@@ -67,6 +63,5 @@ def update_amenity(amenity_id):
         if (key in obj.__dict__ and key not in
                 ['id', 'created_at', 'updated_at']):
             setattr(obj, key, value)
-    setattr(obj, 'updated_at', datetime.utcnow())
-    storage.save()
+    obj.save()
     return jsonify(obj.to_dict()), 200
