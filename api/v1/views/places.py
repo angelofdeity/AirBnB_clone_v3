@@ -45,16 +45,17 @@ def delete_place_by_id(place_id):
 def create_place(city_id):
     """creates a Place object"""
     city = storage.get(City, city_id)
+    data = request.get_json(silent=True)
     if not city:
         abort(404)
-    if not request.json:
+    if not data:
         abort(400, 'Not a JSON')
-    if 'user_id' not in request.json:
+    if 'user_id' not in data:
         abort(400, 'Missing user_id')
-    if 'name' not in request.json:
+    if 'name' not in data:
         abort(400, 'Missing name')
-    obj = Place(**request.json)
-    key = 'Place.' + obj.to_dict().get('id')
+    obj = Place(**data)
+    key = 'Place.' + obj.id
     objects.update({key: obj})
     storage.new(obj)
     storage.save()
@@ -65,14 +66,13 @@ def create_place(city_id):
                  strict_slashes=False)
 def update_place(place_id):
     """updates a Place object"""
-    print("long", request.get_json())
-    print(request.json)
     obj = storage.get(Place, place_id)
+    data = request.get_json(silent=True)
     if not obj:
         abort(404)
-    if not request.json:
+    if not data:
         abort(400, 'Not a JSON')
-    for key, value in request.json.items():
+    for key, value in data.items():
         if (key in obj.__dict__ and key not in
                 ['id', 'user_id', 'city_id', 'created_at', 'updated_at']):
             setattr(obj, key, value)

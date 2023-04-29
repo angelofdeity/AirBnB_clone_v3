@@ -40,13 +40,14 @@ def delete_user_by_id(user_id):
                  strict_slashes=False)
 def create_user():
     """creates a User object"""
-    if not request.json:
+    data = request.get_json(silent=True)
+    if not data:
         abort(400, 'Not a JSON')
-    if 'email' not in request.json:
+    if 'email' not in data:
         abort(400, 'Missing email')
-    if 'password' not in request.json:
+    if 'password' not in data:
         abort(400, 'Missing password')
-    obj = User(**request.json)
+    obj = User(**data)
     key = 'User.' + obj.to_dict().get('id')
     objects.update({key: obj})
     storage.new(obj)
@@ -59,11 +60,12 @@ def create_user():
 def update_user(user_id):
     """updates a User object"""
     obj = storage.get(User, user_id)
+    data = request.get_json(silent=True)
     if not obj:
         abort(404)
-    if not request.json:
+    if not data:
         abort(400, 'Not a JSON')
-    for key, value in request.json.items():
+    for key, value in data.items():
         if (key in obj.__dict__ and key not in
                 ['id', 'email', 'created_at', 'updated_at']):
             setattr(obj, key, value)
