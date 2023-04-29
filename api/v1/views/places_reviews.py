@@ -59,7 +59,6 @@ def create_review(place_id):
         abort(404)
     if not data.get('text'):
         abort(400, "Missing text")
-    
     data.update({'place_id': place_id})
     review = Review(**data)
     review.save()
