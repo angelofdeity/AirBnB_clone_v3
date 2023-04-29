@@ -43,17 +43,19 @@ def delete_place_by_id(place_id):
                  strict_slashes=False)
 def create_place(city_id):
     """creates a Place object"""
+    city = storage.get(City, city_id)
+    if not city:
+        abort(404)
     data = request.get_json(silent=True)
     if not data:
         abort(400, 'Not a JSON')
     if 'user_id' not in data:
         abort(400, 'Missing user_id')
+    user = storage.get(User, data.get('user_id'))
+    if not user:
+        abort(404)
     if 'name' not in data:
         abort(400, 'Missing name')
-    user = storage.get(User, data.get('user_id'))
-    city = storage.get(City, city_id)
-    if not city and not user:
-        abort(404)
     data.update({'city_id': city_id})
     obj = Place(**data)
     obj.save()
