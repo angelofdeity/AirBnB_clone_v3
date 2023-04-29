@@ -7,13 +7,12 @@ from api.v1.views import app_views
 from models import storage
 from models.state import State
 
-objects = storage.all(State)
-
 
 @app_views.route('/states', strict_slashes=False)
 def states():
     """retrieves the list of all State objects"""
-    return jsonify([obj.to_dict() for obj in objects.values()])
+    states = storage.all(State)
+    return jsonify([obj.to_dict() for obj in states.values()])
 
 
 @app_views.route("/states/<state_id>", methods=['GET'], strict_slashes=False)
@@ -32,9 +31,7 @@ def delete_state_by_id(state_id):
     state = storage.get(State, state_id)
     if not state:
         abort(404)
-    storage.delete(state)
-    key = "State." + state_id
-    del objects[key]
+    state.delete()
     storage.save()
     return jsonify({})
 
@@ -44,13 +41,11 @@ def create_state():
     """create a new State object"""
     data = request.get_json(silent=True)
     if not data:
-        abort(404, "Not a JSON")
+        abort(400, "Not a JSON")
     if not data.get('name'):
-        abort(404, "Missing name")
+        abort(400, "Missing name")
     obj = State(**data)
     obj.save()
-    key = "State." + obj.id
-    objects.update({key: obj})
     return jsonify(obj.to_dict()), 201
 
 
@@ -68,5 +63,4 @@ def update_state(state_id):
         if key not in ['id', 'created_at', 'updated_at']:
             setattr(obj, key, value)
     obj.save()
-    storage.save()
     return jsonify(obj.to_dict())
