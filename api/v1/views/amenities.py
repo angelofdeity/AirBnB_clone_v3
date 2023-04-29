@@ -60,8 +60,7 @@ def update_amenity(amenity_id):
     if not data:
         abort(400, 'Not a JSON')
     for key, value in data.items():
-        if (key in obj.__dict__ and key not in
-                ['id', 'created_at', 'updated_at']):
+        if (key not in ['id', 'created_at', 'updated_at']):
             setattr(obj, key, value)
     obj.save()
     return jsonify(obj.to_dict()), 200
