@@ -8,8 +8,6 @@ from models import storage
 from models.state import State
 from models.city import City
 
-objects = storage.all(State)
-
 
 @app_views.route('/states/<state_id>/cities', strict_slashes=False)
 def cities_by_state(state_id):
@@ -38,9 +36,7 @@ def delete_city_by_id(city_id):
     city = storage.get(City, city_id)
     if not city:
         abort(404)
-    storage.delete(city)
-    key = "City." + city_id
-    del objects[key]
+    city.delete()
     storage.save()
     return jsonify({})
 
@@ -51,9 +47,9 @@ def create_city(state_id):
     """creates a new City object"""
     data = request.get_json(silent=True)
     if not data:
-        abort(404, "Not a JSON")
+        abort(400, "Not a JSON")
     if not data.get('name'):
-        abort(404, "Missing name")
+        abort(400, "Missing name")
     obj = storage.get(State, state_id)
     if not obj:
         abort(404)
@@ -77,5 +73,4 @@ def update_city(city_id):
         if key not in ['id', 'created_at', 'updated_at']:
             setattr(obj, key, value)
     obj.save()
-    storage.save()
     return jsonify(obj.to_dict())
