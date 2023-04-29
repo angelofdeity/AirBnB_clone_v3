@@ -2,8 +2,6 @@
 """ holds class City"""
 import models
 from models.base_model import BaseModel, Base
-from os import getenv
-import sqlalchemy
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -19,3 +17,12 @@ class City(BaseModel, Base):
     else:
         state_id = ""
         name = ""
+
+        @property
+        def places(self):
+            """getter attribute returns the list of Place instances"""
+            from models.place import Place
+            all_places = models.storage.all(Place).values()
+            place_list = [place for place in all_places
+                          if place.city_id == self.id]
+            return place_list
