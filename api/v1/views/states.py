@@ -33,6 +33,8 @@ def delete_state_by_id(state_id):
     if not state:
         abort(404)
     storage.delete(state)
+    key = "State." + state_id
+    del objects[key]
     storage.save()
     return jsonify({})
 
@@ -65,5 +67,6 @@ def update_state(state_id):
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
             setattr(obj, key, value)
+    obj.save()
     storage.save()
     return jsonify(obj.to_dict())
