@@ -48,7 +48,7 @@ def create_user():
     if 'password' not in data:
         abort(400, 'Missing password')
     obj = User(**data)
-    key = 'User.' + obj.to_dict().get('id')
+    key = 'User.' + obj.id
     objects.update({key: obj})
     storage.new(obj)
     storage.save()
